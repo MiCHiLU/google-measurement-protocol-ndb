@@ -6,19 +6,16 @@ CLASSIFIERS = [
     'License :: OSI Approved :: BSD License',
     'Operating System :: OS Independent',
     'Programming Language :: Python',
-    'Programming Language :: Python :: 2.5',
-    'Programming Language :: Python :: 2.6',
     'Programming Language :: Python :: 2.7',
-    'Programming Language :: Python :: 3.2',
-    'Programming Language :: Python :: 3.3',
     'Topic :: Software Development :: Libraries :: Python Modules',
 ]
 
-setup(name='google-measurement-protocol',
-      author='Mirumee Software',
-      author_email='hello@mirumee.com',
+setup(name='google-measurement-protocol-ndb',
+      author='ENDOH takanao',
+      author_email='djmchl@gmail.com',
       description=('A Python implementation of'
-                   ' Google Analytics Measurement Protocol'),
+                   ' Google Analytics Measurement Protocol'
+                   ' for Google App Engine NDB'),
       license='BSD',
       version='0.1.3',
       packages=['google_measurement_protocol'],
