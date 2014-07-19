@@ -1,6 +1,8 @@
 google-measurement-protocol-ndb
 ===============================
 
+[![Build Status](https://travis-ci.org/MiCHiLU/google-measurement-protocol-ndb.svg)](https://travis-ci.org/MiCHiLU/google-measurement-protocol-ndb)
+
 A Python implementation of Google Analytics Measurement Protocol for Google App Engine NDB
 
 Transaction handling depends on the `prices` library.
