@@ -1,13 +1,6 @@
 language: python
 python:
-  - 2.6
   - 2.7
-  - 3.2
-  - 3.3
 install:
-  - python setup.py install
-  - pip install coverage
-script: coverage run setup.py test
-after_success:
-  - pip install coveralls
-  - coveralls
+  - curl -s -o google_appengine.zip https://storage.googleapis.com/appengine-sdks/featured/google_appengine_1.9.7.zip && unzip -q google_appengine.zip
+script: PYTHONPATH=`pwd`/google_appengine:`pwd`/google_appengine/lib/yaml/lib python setup.py test

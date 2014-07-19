@@ -1,14 +1,29 @@
 from unittest import TestCase
+import json
+
 try:
     from urllib.parse import parse_qs
 except ImportError:
     from urlparse import parse_qs
 
-from httmock import response, urlmatch, with_httmock
+from google.appengine.api import apiproxy_stub_map
+from google.appengine.api import urlfetch_stub
+from minimock import mock
 from prices import Price
 
 from . import (Event, Item, PageView, report, SystemInfo, Requestable,
                Transaction, payloads)
+
+apiproxy_stub_map.apiproxy = apiproxy_stub_map.APIProxyStubMap()
+apiproxy_stub_map.apiproxy.RegisterStub('urlfetch', urlfetch_stub.URLFetchServiceStub())
+
+def Dummy_RetrieveURL(self, url, payload, method, headers, request, response,
+                      follow_redirects, deadline, validate_certificate):
+  assert method == "POST"
+  response.set_statuscode(200)
+  response.set_content(json.dumps(payload, ensure_ascii=False))
+
+mock("urlfetch_stub.URLFetchServiceStub._RetrieveURL", mock_obj=Dummy_RetrieveURL)
 
 
 class MockRequestable(Requestable):
@@ -17,32 +32,24 @@ class MockRequestable(Requestable):
         return {'t': 'mock'}
 
 
-@urlmatch(netloc=r'ssl\.google-analytics\.com', path='/collect')
-def ga_mock(url, request):
-    qs = parse_qs(request.body)
-    return response(200, qs)
-
-
 class ReportTest(TestCase):
 
-    @with_httmock(ga_mock)
     def test_report(self):
         mr = MockRequestable()
         (response,) = report('UA-123456-78', 'CID', mr)
-        data = response.json()
-        self.assertEqual(data['cid'], ['CID'])
-        self.assertEqual(data['tid'], ['UA-123456-78'])
-        self.assertEqual(data['t'], ['mock'])
+        data = json.loads(response.content)
+        self.assertEqual(data['cid'], 'CID')
+        self.assertEqual(data['tid'], 'UA-123456-78')
+        self.assertEqual(data['t'], 'mock')
 
-    @with_httmock(ga_mock)
     def test_extra_info(self):
         empty_info = SystemInfo()
         self.assertEqual(empty_info.get_payload(), {})
         mr = MockRequestable()
         info = SystemInfo(language='en-gb')
         (response,) = report('UA-123456-78', 'CID', mr, extra_info=info)
-        data = response.json()
-        self.assertEqual(data['ul'], ['en-gb'])
+        data = json.loads(response.content)
+        self.assertEqual(data['ul'], 'en-gb')
 
 
 class PageViewTest(TestCase):

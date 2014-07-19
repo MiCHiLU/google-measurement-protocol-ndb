@@ -1,20 +1,31 @@
 from collections import namedtuple
 
-import requests
+from google.appengine.ext import ndb
 
 TRACKING_URI = 'https://ssl.google-analytics.com/collect'
 
 
-def _request(data, extra_headers):
-    return requests.post(TRACKING_URI, data=data, headers=extra_headers)
+def _request(ctx, data, extra_headers):
+    if extra_headers is None:
+      extra_headers = dict()
+    return ctx.urlfetch(TRACKING_URI, payload=data, method="POST", headers=extra_headers)
+
+
+def async_report(tracking_id, client_id, requestable, extra_info=None,
+           extra_headers=None):
+    """Actually report measurements to Google Analytics."""
+    ctx = ndb.get_context()
+    return [_request(ctx, data, extra_headers)
+            for data, extra_headers in payloads(
+            tracking_id, client_id, requestable, extra_info, extra_headers)]
 
 
 def report(tracking_id, client_id, requestable, extra_info=None,
            extra_headers=None):
-    """Actually report measurements to Google Analytics."""
-    return [_request(data, extra_headers)
-            for data, extra_headers in payloads(
-            tracking_id, client_id, requestable, extra_info, extra_headers)]
+    futures = async_report(tracking_id, client_id, requestable, extra_info, extra_headers)
+    for future in futures:
+      future.check_success()
+      yield future.get_result()
 
 
 def payloads(tracking_id, client_id, requestable, extra_info=None,
