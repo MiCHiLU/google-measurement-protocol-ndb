@@ -1,6 +1,4 @@
 from unittest import TestCase
-import json
-
 try:
     from urllib.parse import parse_qs
 except ImportError:
@@ -21,7 +19,7 @@ def Dummy_RetrieveURL(self, url, payload, method, headers, request, response,
                       follow_redirects, deadline, validate_certificate):
   assert method == "POST"
   response.set_statuscode(200)
-  response.set_content(json.dumps(payload, ensure_ascii=False))
+  response.set_content(payload)
 
 mock("urlfetch_stub.URLFetchServiceStub._RetrieveURL", mock_obj=Dummy_RetrieveURL)
 
@@ -37,10 +35,10 @@ class ReportTest(TestCase):
     def test_report(self):
         mr = MockRequestable()
         (response,) = report('UA-123456-78', 'CID', mr)
-        data = json.loads(response.content)
-        self.assertEqual(data['cid'], 'CID')
-        self.assertEqual(data['tid'], 'UA-123456-78')
-        self.assertEqual(data['t'], 'mock')
+        data = parse_qs(response.content)
+        self.assertEqual(data['cid'], ['CID'])
+        self.assertEqual(data['tid'], ['UA-123456-78'])
+        self.assertEqual(data['t'], ['mock'])
 
     def test_extra_info(self):
         empty_info = SystemInfo()
@@ -48,8 +46,8 @@ class ReportTest(TestCase):
         mr = MockRequestable()
         info = SystemInfo(language='en-gb')
         (response,) = report('UA-123456-78', 'CID', mr, extra_info=info)
-        data = json.loads(response.content)
-        self.assertEqual(data['ul'], 'en-gb')
+        data = parse_qs(response.content)
+        self.assertEqual(data['ul'], ['en-gb'])
 
 
 class PageViewTest(TestCase):

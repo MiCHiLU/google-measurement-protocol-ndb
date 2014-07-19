@@ -1,4 +1,5 @@
 from collections import namedtuple
+import urllib
 
 from google.appengine.ext import ndb
 
@@ -8,7 +9,7 @@ TRACKING_URI = 'https://ssl.google-analytics.com/collect'
 def _request(ctx, data, extra_headers):
     if extra_headers is None:
       extra_headers = dict()
-    return ctx.urlfetch(TRACKING_URI, payload=data, method="POST", headers=extra_headers)
+    return ctx.urlfetch(TRACKING_URI, payload=urllib.urlencode(data), method="POST", headers=extra_headers)
 
 
 def async_report(tracking_id, client_id, requestable, extra_info=None,
