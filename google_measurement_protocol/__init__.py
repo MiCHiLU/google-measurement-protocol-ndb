@@ -12,7 +12,7 @@ def _request(ctx, data, extra_headers):
     return ctx.urlfetch(TRACKING_URI, payload=urllib.urlencode(data), method="POST", headers=extra_headers)
 
 
-def async_report(tracking_id, client_id, requestable, extra_info=None,
+def report_async(tracking_id, client_id, requestable, extra_info=None,
            extra_headers=None):
     """Actually report measurements to Google Analytics."""
     ctx = ndb.get_context()
@@ -23,7 +23,7 @@ def async_report(tracking_id, client_id, requestable, extra_info=None,
 
 def report(tracking_id, client_id, requestable, extra_info=None,
            extra_headers=None):
-    futures = async_report(tracking_id, client_id, requestable, extra_info, extra_headers)
+    futures = report_async(tracking_id, client_id, requestable, extra_info, extra_headers)
     for future in futures:
       future.check_success()
       yield future.get_result()
