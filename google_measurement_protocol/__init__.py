@@ -43,7 +43,7 @@ def payloads(tracking_id, client_id, requestable, extra_info=None,
         'v': '1',
         'tid': tracking_id,
         'cid': client_id,
-        'aip': '1'}
+    }
     if extra_info:
         for payload in extra_info:
             extra_payload.update(payload)
