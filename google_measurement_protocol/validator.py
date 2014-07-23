@@ -55,9 +55,12 @@ def validate_qt(value):
     if not is_qt(value):
         raise ValidationError(_("Enter a valid 'qt' (Queue Time)."))
 
+cid_regex = re.compile(r"^[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}$", re.IGNORECASE)
+
 def is_cid(value):
     """
     >>> assert is_cid("35009a79-1a05-49d7-b876-2b884d0f825b")
+    >>> assert not is_cid("35009a791a0549d7b8762b884d0f825b")
     >>> assert not is_cid(None)
     """
     try:
@@ -65,7 +68,10 @@ def is_cid(value):
     except Exception:
         return False
     else:
-        return u.version == 4
+        if bool(cid_regex.match(value)):
+            return u.version == 4
+        else:
+            return False
 
 def validate_cid(value):
     if not is_cid(value):
